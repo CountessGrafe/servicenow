@@ -1,6 +1,6 @@
 ---
 name: hrsd-new-service
-description: Create a complete HRSD service on ServiceNow — custom table, Record Producer, fulfillment flow, HR Service, and Employee Center wiring. Requires now-sdk + Fluent. MCP is used where available.
+description: Create a complete HRSD service on ServiceNow — custom table (optional), Record Producer, fulfillment flow, HR Service, and Employee Center wiring. Requires now-sdk + Fluent. MCP is used where available.
 ---
 
 Read @hrsd-knowledge/SKILL.md before proceeding — it contains all HRSD platform patterns referenced below.
@@ -12,7 +12,7 @@ Ask the user for everything needed before writing any code. Collect in a single 
 **Required:**
 - Service name (e.g., "Office Snack Request")
 - Scope prefix of the scoped app (e.g., `x_1970577_snack`)
-- Custom table fields: for each field, get label, suggested column name, type (String, Reference, Choice, MultiLineText), mandatory flag, and choices if Choice type
+- If custome table is needed - Custom table fields: for each field, get label, suggested column name, type (String, Reference, Choice, MultiLineText), mandatory flag, and choices if Choice type
 - Record Producer variables: for each variable, get label, name, type (SingleLineText, SelectBox, Reference, MultiLineText), mandatory flag, read-only flag, default value if any, and choices if SelectBox type
 - Flow field mapping: which RP variable value maps to which custom table column
 
