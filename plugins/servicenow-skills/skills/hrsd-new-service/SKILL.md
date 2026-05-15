@@ -1,6 +1,6 @@
 ---
 name: hrsd-new-service
-description: Create a complete HRSD service on ServiceNow — custom table (optional), Record Producer, fulfillment flow, HR Service, and Employee Center wiring. Requires now-sdk + Fluent. MCP is used where available.
+description: Create a complete HRSD service on ServiceNow — Record Producer, fulfillment flow, HR Service, and Employee Center wiring. Requires now-sdk + Fluent. MCP is used where available. Custom table creation is out of scope — use a separate skill for that.
 ---
 
 Read @hrsd-knowledge/SKILL.md before proceeding — it contains all HRSD platform patterns referenced below.
@@ -10,11 +10,9 @@ Read @hrsd-knowledge/SKILL.md before proceeding — it contains all HRSD platfor
 Ask the user for everything needed before writing any code. Collect in a single conversation turn where possible:
 
 **Required:**
-- Service name (e.g., "Office Snack Request")
-- Scope prefix of the scoped app (e.g., `x_1970577_snack`)
-- If custome table is needed - Custom table fields: for each field, get label, suggested column name, type (String, Reference, Choice, MultiLineText), mandatory flag, and choices if Choice type
+- Service name (e.g., "Office Plant Request")
+- Scope prefix of the scoped app (e.g., `x_solv_plants`)
 - Record Producer variables: for each variable, get label, name, type (SingleLineText, SelectBox, Reference, MultiLineText), mandatory flag, read-only flag, default value if any, and choices if SelectBox type
-- Flow field mapping: which RP variable value maps to which custom table column
 
 **Optional — offer to skip:**
 - HR Service template (sys_id)
@@ -24,8 +22,7 @@ Ask the user for everything needed before writing any code. Collect in a single 
 - HR Service case_creation_service_config (sys_id)
 
 Derive automatically (do not ask):
-- `table_name`: `{scope_prefix}_{snake_case_service_name}` — e.g., `x_1970577_snack_office_snack_request`
-- `hr_service_value`: snake_case of service name — e.g., `office_snack_request`
+- `hr_service_value`: snake_case of service name — e.g., `office_plant_request`
 
 ## Step 2: Pre-flight checks
 
@@ -50,31 +47,9 @@ npm run types
 
 ## Step 3: Write SDK source files
 
-Create three files. Use the collected field/variable definitions to populate the schemas.
+Create two files. Custom table creation is out of scope for this skill — if a table is needed (e.g., for integration data from Sage, SuccessFactors, Softgarden, etc.), handle it separately before running this skill.
 
-**3a. Custom table** — `src/fluent/tables/<table-name>.now.ts`
-
-```typescript
-import '@servicenow/sdk/global'
-import { Table, ReferenceColumn, StringColumn, ChoiceColumn, MultiLineTextColumn } from '@servicenow/sdk/core'
-
-export const <table_name> = Table({
-    name: '<table_name>',
-    label: '<Table Label>',
-    schema: {
-        u_employee: ReferenceColumn({ label: 'Employee', referenceTable: 'sys_user', mandatory: true }),
-        u_hr_case: ReferenceColumn({ label: 'HR Case', referenceTable: 'sn_hr_core_case', mandatory: true }),
-        // add remaining fields from user's definition
-    },
-})
-```
-
-Rules:
-- Export the table as a named const matching the table name exactly (SDK TS213 error otherwise)
-- `u_employee` and `u_hr_case` are standard for any HRSD service — always include them
-- For ChoiceColumn: `choices: { value: { label: 'Label' } }` format
-
-**3b. Record Producer** — `src/fluent/catalog/<service-name>-rp.now.ts`
+**3a. Record Producer** — `src/fluent/catalog/<service-name>-rp.now.ts`
 
 ```typescript
 import '@servicenow/sdk/global'
@@ -113,12 +88,11 @@ Rules:
 - Do NOT set both `readOnly: true` and `mandatory: true` on the same variable
 - For SelectBoxVariable: `{ value: { label: 'Label', sequence: N, inactive: false } }`
 
-**3c. Fulfillment flow** — `src/fluent/flows/<service-name>-flow.now.ts`
+**3b. Fulfillment flow** — `src/fluent/flows/<service-name>-flow.now.ts`
 
 ```typescript
 import '@servicenow/sdk/global'
 import { Flow, wfa, trigger, action } from '@servicenow/sdk/automation'
-import { <RPConstName> } from '../catalog/<rp-file>'
 
 Flow(
     {
@@ -137,33 +111,6 @@ Flow(
         }
     ),
     _params => {
-        const catalogVars = wfa.action(
-            action.core.getCatalogVariables,
-            { $id: Now.ID['get-catalog-vars'], annotation: 'Retrieve RP variable values using the HR Case as the submitted request' },
-            {
-                requested_item: wfa.dataPill(_params.trigger.current, 'reference'),
-                template_catalog_item: `${<RPConstName>}`,
-                catalog_variables: [
-                    <RPConstName>.variables.field_one,
-                    // list all variables whose values need to be mapped to the custom table
-                ],
-            }
-        )
-
-        wfa.action(
-            action.core.createRecord,
-            { $id: Now.ID['create-record'], annotation: 'Create one <Table Label> record linked to the HR Case' },
-            {
-                table_name: '<table_name>',
-                values: TemplateValue({
-                    // @ts-ignore TS4111: SDK requires dot notation; subject_person is valid on sn_hr_core_case
-                    u_employee: wfa.dataPill(_params.trigger.current.subject_person, 'reference'),
-                    u_hr_case: wfa.dataPill(_params.trigger.current, 'reference'),
-                    // map each catalogVars output to the corresponding custom table field
-                }),
-            }
-        )
-
         wfa.action(
             action.core.createTask,
             { $id: Now.ID['create-hr-task'], annotation: 'Create HR Task linked to the HR Case, assigned to the subject person' },
@@ -183,8 +130,7 @@ Flow(
 ```
 
 Rules:
-- Import the RP const and use `RP.variables.fieldName` in `catalog_variables` — not string literals
-- Use `` `${RPConstName}` `` for `template_catalog_item`
+- The RP import is not needed in the flow unless RP variable values must be used in a flow step (e.g., passing data to an integration). Add `getCatalogVariables` only when required.
 - `TemplateValue` is a global — do NOT import it
 - Add `// @ts-ignore TS4111` above any dot-notation access on OOB tables without Fluent type definitions
 
@@ -197,7 +143,6 @@ npm run deploy -- --reinstall
 After deploy, query the instance via MCP to get sys_ids:
 - `sc_cat_item_producer` by name → RP sys_id
 - `sys_hub_flow` by name → flow sys_id
-- `sys_db_object` by name → confirm custom table exists
 
 ## Step 5: Create HR Service via MCP
 
@@ -268,7 +213,6 @@ Query every artifact and report sys_id + key fields:
 | HR Service | `sn_hr_core_service` | `value`, `service_table`, `producer`, `flow`, `header_config_opened_for`, `header_config_subject_person`, `subject_person_access=true` |
 | Record Producer | `sc_cat_item_producer` | `script` populated, variable count matches |
 | Flow | `sys_hub_flow` | `active=true`, `status=published` |
-| Custom table | `sys_db_object` | Exists |
 | Catalog | `sc_cat_item_catalog` | RP linked to HR catalog |
 | Category | `sc_cat_item_category` | RP linked to chosen category |
 | Topic | `m2m_connected_content` | `content_display_value` populated |
