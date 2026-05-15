@@ -153,7 +153,7 @@ name:                         <Service Name>
 value:                        <hr_service_value>
 service_table:                sn_hr_core_case
 topic_detail:                 <General topic detail sys_id from Step 2d>
-fulfillment_type:             simple
+fulfillment_type:             flow
 producer:                     <RP sys_id from Step 4>
 flow:                         <Flow sys_id from Step 4>
 header_config_opened_for:     <from Step 2d>
