@@ -50,7 +50,7 @@ query_records(table: 'sys_scope', query: 'scope=<artifact_scope>', fields: 'sys_
 
 | Scope type | Example | Recommended path |
 |---|---|---|
-| Custom app in now-sdk project | `x_1970577_countess` | SDK path |
+| Custom app in now-sdk project | `x_<scope_prefix>` | SDK path |
 | Global | `global` | MCP path (suite/schedule only) + manual UI for steps |
 | OOB module | `sn_hr_core`, `sn_csm`, `sn_incident` | SDK path (server-side) for functional testing; manual UI for browser steps |
 

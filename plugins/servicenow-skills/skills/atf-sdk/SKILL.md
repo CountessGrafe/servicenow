@@ -58,7 +58,7 @@ This skill creates ATF tests for ServiceNow scoped applications built with the `
 |---|---|---|
 | Script Include | Each public method: return value, edge cases (empty input, missing optional fields) | `server.runServerSideScript` (Jasmine) |
 | Business Rule | Insert/update the trigger record; assert the expected side-effect occurred | `server.recordInsert`, `server.recordValidation`, `server.recordDelete` |
-| Catalog Item | (1) Server-side: create test user → impersonate → submit via `GlideCatalogCart` → poll for downstream record → assert fields including `submitted_by` → revert impersonation → delete standup entry + RITM + sc_request + test user. (2) ESC portal UI test (open Employee Center → navigate to item → fill variables → submit) requires catalog `step_config` types not available in SDK — use MCP or ServiceNow UI for those steps. | `server.recordInsert` (sys_user), `server.impersonate`, `server.runServerSideScript`, `server.recordDelete` |
+| Catalog Item | (1) Server-side: create test user → impersonate → submit via `GlideCatalogCart` → poll for downstream record → assert fields including `submitted_by` → revert impersonation → delete output record + RITM + sc_request + test user. (2) ESC portal UI test (open Employee Center → navigate to item → fill variables → submit) requires catalog `step_config` types not available in SDK — use MCP or ServiceNow UI for those steps. | `server.recordInsert` (sys_user), `server.impersonate`, `server.runServerSideScript`, `server.recordDelete` |
 | Flow / Subflow | Insert the record that triggers the flow; assert the output record | `server.recordInsert`, `server.recordValidation`, `server.recordDelete` |
 | Table / Fields | Assert required fields exist with the correct type and mandatory flag | `server.runServerSideScript` |
 | ACL | Impersonate a user with and without the required role; assert allowed / denied | `server.impersonate`, `server.recordInsert`, `server.recordValidation` |
@@ -413,9 +413,8 @@ When you need to verify the full catalog item → flow → output record chain w
    order_catalog_item(
        sys_id: '<catalog_item_sys_id>',
        variables: {
-           worked_on: 'MCP E2E test value',
-           next_up: 'MCP E2E next value',
-           blockers: ''
+           variable_one: 'MCP E2E test value',
+           variable_two: 'MCP E2E next value',
        }
    )
    ```
@@ -424,8 +423,8 @@ When you need to verify the full catalog item → flow → output record chain w
    ```
    query_records(
        table: '<output_table>',
-       query: 'worked_onCONTAINSMCP E2E test value',
-       fields: 'sys_id,worked_on,next_up,submitted_by,sys_created_on',
+       query: 'variable_oneCONTAINSMCP E2E test value',
+       fields: 'sys_id,variable_one,variable_two,submitted_by,sys_created_on',
        orderBy: '-sys_created_on',
        limit: 1
    )
@@ -460,39 +459,39 @@ import { Test } from '@servicenow/sdk/core'
 
 Test(
     {
-        $id: Now.ID['test-standup-utils'],
-        name: 'Test - StandupUtils',
-        description: 'Unit tests for StandupUtils: formatEntry and getRecentEntries',
+        $id: Now.ID['test-my-script-include'],
+        name: 'Test - MyScriptInclude',
+        description: 'Unit tests for MyScriptInclude: myMethod and anotherMethod',
         active: true,
         failOnServerError: true,
     },
     (atf) => {
         atf.server.runServerSideScript({
-            $id: Now.ID['test-standup-utils-step-format'],
-            description: 'Verify formatEntry returns a string with worked_on and next_up values',
-            script: `describe('StandupUtils.formatEntry', function() {
+            $id: Now.ID['test-my-script-include-step-method'],
+            description: 'Verify myMethod returns a string with field_one and field_two values',
+            script: `describe('MyScriptInclude.myMethod', function() {
     it('returns a non-empty string', function() {
-        var utils = new x_1970577_countess.StandupUtils();
-        var gr = new GlideRecord('x_1970577_countess_standup_entry');
+        var utils = new x_<scope_prefix>.MyScriptInclude();
+        var gr = new GlideRecord('x_<scope_prefix>_<table_name>');
         gr.initialize();
-        gr.setValue('worked_on', 'Fixed auth bug');
-        gr.setValue('next_up', 'Deploy to staging');
-        gr.setValue('blockers', '');
+        gr.setValue('field_one', 'ATF test value one');
+        gr.setValue('field_two', 'ATF test value two');
+        gr.setValue('field_three', '');
         gr.setValue('date', gs.nowDate());
-        var result = utils.formatEntry(gr);
+        var result = utils.myMethod(gr);
         expect(typeof result).toBe('string');
         expect(result.length).toBeGreaterThan(0);
     });
-    it('omits Blockers line when blockers is empty', function() {
-        var utils = new x_1970577_countess.StandupUtils();
-        var gr = new GlideRecord('x_1970577_countess_standup_entry');
+    it('handles empty optional field without throwing', function() {
+        var utils = new x_<scope_prefix>.MyScriptInclude();
+        var gr = new GlideRecord('x_<scope_prefix>_<table_name>');
         gr.initialize();
-        gr.setValue('worked_on', 'Work');
-        gr.setValue('next_up', 'Next');
-        gr.setValue('blockers', '');
+        gr.setValue('field_one', 'Work');
+        gr.setValue('field_two', 'Next');
+        gr.setValue('field_three', '');
         gr.setValue('date', gs.nowDate());
-        var result = utils.formatEntry(gr);
-        expect(result).not.toContain('Blockers:');
+        var result = utils.myMethod(gr);
+        expect(result).toBeDefined();
     });
 });`,
         })
@@ -507,39 +506,39 @@ import { Test } from '@servicenow/sdk/core'
 
 Test(
     {
-        $id: Now.ID['test-standup-entry'],
-        name: 'Test - Standup Entry',
-        description: 'Verify standup entry records can be inserted, validated, and deleted',
+        $id: Now.ID['test-my-table-entry'],
+        name: 'Test - MyCatalogItem',
+        description: 'Verify output records can be inserted, validated, and deleted',
         active: true,
         failOnServerError: true,
     },
     (atf) => {
         const inserted = atf.server.recordInsert({
-            $id: Now.ID['test-standup-entry-step-insert'],
-            description: 'Insert a standup entry with all required fields',
-            table: 'x_1970577_countess_standup_entry',
+            $id: Now.ID['test-my-table-entry-step-insert'],
+            description: 'Insert an output record with all required fields',
+            table: 'x_<scope_prefix>_<table_name>',
             fieldValues: {
-                worked_on: 'ATF test: insert step',
-                next_up: 'ATF test: validate step',
-                blockers: '',
-                date: '2026-05-08',
+                field_one: 'ATF test value one',
+                field_two: 'ATF test value two',
+                field_three: '',
+                date: '<date_value>',
             },
             enforceSecurity: false,
         })
 
         atf.server.recordValidation({
-            $id: Now.ID['test-standup-entry-step-validate'],
-            description: 'Confirm worked_on and next_up contain the expected values',
-            table: 'x_1970577_countess_standup_entry',
+            $id: Now.ID['test-my-table-entry-step-validate'],
+            description: 'Confirm field_one and field_two contain the expected values',
+            table: 'x_<scope_prefix>_<table_name>',
             recordId: inserted.record_id,
-            fieldValues: 'worked_onCONTAINSATF test: insert step^next_upCONTAINSATF test: validate step',
+            fieldValues: 'field_oneCONTAINSATF test value one^field_twoCONTAINSATF test value two',
             enforceSecurity: false,
         })
 
         atf.server.recordDelete({
-            $id: Now.ID['test-standup-entry-step-delete'],
+            $id: Now.ID['test-my-table-entry-step-delete'],
             description: 'Remove the test record',
-            table: 'x_1970577_countess_standup_entry',
+            table: 'x_<scope_prefix>_<table_name>',
             recordId: inserted.record_id,
             enforceSecurity: false,
         })
