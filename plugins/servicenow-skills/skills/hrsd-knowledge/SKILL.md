@@ -5,13 +5,13 @@ description: HRSD platform knowledge reference for ServiceNow — patterns, cons
 
 ## Record Producer script (mandatory)
 
-Every HR Record Producer MUST have this in the Script field. Without it, submission will not create an HR Case:
+Every HR Record Producer MUST have this in the Script field:
 
 ```javascript
 new sn_hr_core.hr_ServicesUtil(current, gs).createCaseFromProducer(producer, cat_item.sys_id);
 ```
 
-This call sets `subject_person` and `short_description` on the HR Case. It must be passed as a plain string — not a typed function — to avoid `cat_item` parameter type conflicts in the SDK.
+Without it, an HR Case is still created on submit, but it will be missing `subject_person`, `opened_for`, and a properly formatted `short_description`. The case is incomplete and will not behave correctly in the HRSD lifecycle. This call populates those fields correctly. It must be passed as a plain string — not a typed function — to avoid `cat_item` parameter type conflicts in the SDK.
 
 ## Flow trigger
 
@@ -83,7 +83,7 @@ When creating `sn_hr_core_service`, ALL of these must be set at creation time:
 | `header_config_opened_for` | sys_id from existing HR service — always the same OOB value across all services |
 | `header_config_subject_person` | sys_id from existing HR service — always the same OOB value |
 | `subject_person_access` | `true` so employees can see their own case |
-| `badge` | Must be set to `HR` — without this the service does not display correctly in Employee Center |
+| `badge` | Set to `HR` — not required for the service to appear in Employee Center, but recommended for correct styling and categorisation |
 | `active` | `true` |
 
 Optional fields to ask about: `template`, `case_options`, `hr_criteria`, `fulfillment_instructions`, `case_creation_service_config`.
