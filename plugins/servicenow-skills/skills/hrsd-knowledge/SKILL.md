@@ -98,15 +98,25 @@ query sn_hr_core_service where active=true, return header_config_opened_for, hea
 
 COE on the HR Service is derived automatically: `topic_detail → topic_category → coe`. Choose a `topic_detail` whose `topic_category.coe` is `sn_hr_core_case` for a standard HR case service. The "General" topic detail (look it up by name on the instance) covers the common case.
 
-## Flow activation after deploy
+## Flow not triggering after deploy
 
-The SDK deploys flows in draft state. The flow trigger is NOT registered until the flow is activated in Flow Designer. After every deploy:
+Two separate things must be true for the flow to fire — check both:
 
-1. Open Flow Designer on the instance
-2. Find the flow by name
-3. Click **Activate**
+**1. Flow must be active**
+The SDK may deploy flows in draft state. Open Flow Designer, find the flow, and confirm it is active. If not, click **Activate**. This cannot be done via MCP or the Table API.
 
-This cannot be done via MCP or the Table API — it requires the Flow Designer UI. Without this step the trigger will never fire regardless of the flow's `active` flag.
+**2. Trigger condition must match the HR Service name exactly**
+This is the more common failure. The condition `hr_service=<Service Name>` is a reference field condition — the value must be the HR Service's `name` field verbatim. A wrong name, extra space, or using `hr_service.name=` instead of `hr_service=` will silently prevent the flow from triggering even when the flow is active and the case is created.
+
+```typescript
+// ✅ Correct
+condition: 'hr_service=Office Plant Request'
+
+// ❌ Wrong — dot notation does not work on reference conditions
+condition: 'hr_service.name=Office Plant Request'
+```
+
+Always verify by querying the HR Service record and copying the `name` field value directly rather than typing it.
 
 ## Restricted caller access after cross-scope deploy
 
