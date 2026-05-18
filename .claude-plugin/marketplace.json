@@ -7,8 +7,8 @@
     {
       "name": "servicenow-skills",
       "source": "./plugins/servicenow-skills/",
-      "description": "Solvvision ServiceNow skills — HRSD service creation, SDK patterns, and platform runbooks",
-      "version": "1.0.0",
+      "description": "Solvvision ServiceNow skills — HRSD service creation, SDK patterns, ATF testing, and platform runbooks",
+      "version": "1.1.0",
       "author": {
         "name": "Solvvision"
       }
