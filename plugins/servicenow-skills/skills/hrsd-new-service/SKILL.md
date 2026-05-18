@@ -106,7 +106,7 @@ Flow(
         { $id: Now.ID['<trigger-id>'] },
         {
             table: 'sn_hr_core_case',
-            condition: 'hr_service.name=<HR Service Name>',
+            condition: 'hr_service=<HR Service Name>',
             run_flow_in: 'background',
         }
     ),
@@ -144,6 +144,15 @@ After deploy, query the instance via MCP to get sys_ids:
 - `sc_cat_item_producer` by name → RP sys_id
 - `sys_hub_flow` by name → flow sys_id
 
+Then immediately approve any restricted caller access records created by the cross-scope deploy:
+
+```
+query sys_scope_privilege where status=requested AND principal_scope=<app scope sys_id>
+→ update each record: status = allowed
+```
+
+Without this step the flow will fail at runtime when it tries to create records in `sn_hr_core`.
+
 ## Step 5: Create HR Service via MCP
 
 Create a new `sn_hr_core_service` record with ALL fields in a single create call:
@@ -159,6 +168,7 @@ flow:                         <Flow sys_id from Step 4>
 header_config_opened_for:     <from Step 2d>
 header_config_subject_person: <from Step 2d>
 subject_person_access:        true
+badge:                        HR
 active:                       true
 ```
 

@@ -23,7 +23,7 @@ wfa.trigger(
     { $id: Now.ID['<trigger-id>'] },
     {
         table: 'sn_hr_core_case',
-        condition: 'hr_service.name=<HR Service Name>',
+        condition: 'hr_service=<HR Service Name>',
         run_flow_in: 'background',
     }
 )
@@ -83,6 +83,7 @@ When creating `sn_hr_core_service`, ALL of these must be set at creation time:
 | `header_config_opened_for` | sys_id from existing HR service — always the same OOB value across all services |
 | `header_config_subject_person` | sys_id from existing HR service — always the same OOB value |
 | `subject_person_access` | `true` so employees can see their own case |
+| `badge` | Must be set to `HR` — without this the service does not display correctly in Employee Center |
 | `active` | `true` |
 
 Optional fields to ask about: `template`, `case_options`, `hr_criteria`, `fulfillment_instructions`, `case_creation_service_config`.
@@ -106,6 +107,19 @@ The SDK deploys flows in draft state. The flow trigger is NOT registered until t
 3. Click **Activate**
 
 This cannot be done via MCP or the Table API — it requires the Flow Designer UI. Without this step the trigger will never fire regardless of the flow's `active` flag.
+
+## Restricted caller access after cross-scope deploy
+
+When a flow deployed in a scoped app (e.g., `x_solv_plants`) creates records in an OOB scope (e.g., `sn_hr_core`), ServiceNow automatically creates a `sys_scope_privilege` record with `status=requested`. The flow will fail at runtime until this is approved.
+
+After every deploy, query `sys_scope_privilege` for requested records and update them to `allowed`:
+
+```
+query sys_scope_privilege where status=requested, principal_scope=<your app scope sys_id>
+→ update each record: status = allowed
+```
+
+Do this via MCP immediately after verifying the deploy, before instructing the user to activate the flow.
 
 ## ESC visibility: catalog, category, topic
 
