@@ -22,12 +22,12 @@ Step 3    Record Producer            (only if request-submitted)
 Step 4    HR Service template        (only if defaults like group/priority needed)
 Step 5    Fulfillment flow           (only if fulfillment is automated → flip to flow)
 Step 6    Employee Center publishing (only if requestable in ESC)
-Step 6.5  German translations        (always — after all English content is in place)
+Step 6.5  German translations        (if needed — after all English content is in place)
 Step 7    ATF tests                  (always — scaled to what was built)
 Step 8    Verify                     (always — rows conditional on what exists)
 ```
 
-**Language rule:** implement everything in English first. Only after all English artifacts are deployed and verified (Steps 2–6) add German translations in Step 6.5. Never author German content in the same pass as the initial artifact — the English version is the source of truth.
+**Language rule:** implement everything in English first. Only after all English artifacts are deployed and verified (Steps 2–6) and if German translation is needed, add German translations in Step 6.5. Never author German content in the same pass as the initial artifact — the English version is the source of truth.
 
 ## Step 0: Bootstrap instance constants
 
