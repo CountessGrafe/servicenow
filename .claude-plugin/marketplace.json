@@ -16,8 +16,8 @@
     {
       "name": "atf-skills",
       "source": "./plugins/atf-skills/",
-      "description": "SolvVision ATF skill — general-purpose server-side and UI testing for any ServiceNow project",
-      "version": "1.0.0",
+      "description": "SolvVision ATF — atf-unified skill + atf-tester subagent + /atf-verify command + post-deploy hook: self-healing server-side and UI testing with audit reporting for any ServiceNow project",
+      "version": "1.1.0",
       "author": {
         "name": "Solvvision"
       }
