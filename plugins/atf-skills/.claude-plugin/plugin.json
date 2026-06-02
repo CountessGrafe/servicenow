@@ -1,7 +1,7 @@
 {
   "name": "atf-skills",
-  "description": "SolvVision ATF skills for Claude Code — SDK-first test authoring, unified auto-detection, suite creation, scheduling, and hard limits reference for ServiceNow Automated Test Framework",
-  "version": "1.0.0",
+  "description": "SolvVision ATF skills for Claude Code — the atf-unified skill (lean core + on-demand references) plus the atf-tester subagent, the /atf-verify command, and a post-deploy hook: self-healing test authoring, audit reporting with screenshots, suites, and scheduling for ServiceNow Automated Test Framework",
+  "version": "1.1.0",
   "author": {
     "name": "Solvvision",
     "url": "https://solvvision.de"
