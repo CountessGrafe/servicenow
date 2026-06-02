@@ -10,7 +10,7 @@ human-in-the-loop decision. You are the **caller/coordinator**; the `atf-tester`
 ## Target
 
 Resolve the target from `$ARGUMENTS`:
-- A name or path (e.g. `StandupUtils`, `src/fluent/catalog-items/SubmitDailyStandup.now.ts`) → that artifact.
+- A name or path (e.g. `MyScriptInclude`, `src/fluent/catalog-items/MyCatalogItem.now.ts`) → that artifact.
 - `--last-deployed` or empty → the artifact(s) changed in this session (infer from recently modified
   `src/fluent/**` files). State the inferred target before proceeding.
 

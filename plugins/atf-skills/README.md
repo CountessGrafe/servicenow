@@ -84,8 +84,8 @@ must rebuild it (`npm run build` in the server dir) and reconnect MCP.
 
 ## Related artifacts (outside this plugin)
 
-- **Project test set / reports:** `<project>/src/fluent/tests/StandupUtils*.test.now.ts` (positive /
-  self-heal / negative examples) and `<project>/atf-reports/*.md` (run reports).
+- **Project test set / reports:** `<project>/src/fluent/tests/*.test.now.ts` and `<project>/atf-reports/*.md`
+  — each project keeps its own tests + run reports; this plugin is project-agnostic and ships none.
 - **MCP patch:** `~/Desktop/servicenow-mcp/src/tools/atf.ts` (`run_atf_suite` → CI/CD API).
 - **Global rule:** `~/.claude/CLAUDE.md` "Self-Healing Loop" delegates to this skill + the `atf-tester` agent.
 

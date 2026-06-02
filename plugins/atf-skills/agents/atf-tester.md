@@ -10,7 +10,7 @@ description: |
 
   <example>
   Context: The user just deployed a new Script Include.
-  user: "I've deployed StandupUtils — make sure it works."
+  user: "I've deployed a new Script Include — make sure it works."
   assistant: "I'll delegate to the atf-tester agent to author, deploy, and self-heal its ATF coverage and report back a verdict."
   <commentary>An artifact was deployed and needs verification — exactly atf-tester's job. The main agent delegates and waits for the GREEN/BLOCKED/ERROR verdict.</commentary>
   </example>
@@ -23,8 +23,8 @@ description: |
 
   <example>
   Context: The user runs /atf-verify on a catalog item.
-  user: "/atf-verify SubmitDailyStandup"
-  assistant: "Running the atf-tester agent against SubmitDailyStandup; on a BLOCKED result I'll ask you how to proceed."
+  user: "/atf-verify MyCatalogItem"
+  assistant: "Running the atf-tester agent against MyCatalogItem; on a BLOCKED result I'll ask you how to proceed."
   <commentary>The command is the front door; atf-tester is the worker; the command owns the human gate.</commentary>
   </example>
 model: inherit
@@ -90,8 +90,8 @@ you operate as a delegated agent*.
 
 ## Inputs you expect
 
-The caller passes one of: an artifact name/path/type (e.g. "Script Include StandupUtils",
-`src/fluent/catalog-items/SubmitDailyStandup.now.ts`), or "verify the artifacts changed this session." If
+The caller passes one of: an artifact name/path/type (e.g. "the Script Include MyUtils",
+`src/fluent/catalog-items/MyCatalogItem.now.ts`), or "verify the artifacts changed this session." If
 the target is ambiguous, infer it from recently changed `src/fluent/**` files and **state your assumption
 in the verdict** — do not stop to ask.
 
