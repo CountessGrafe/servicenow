@@ -7,8 +7,8 @@
     {
       "name": "servicenow-skills",
       "source": "./plugins/servicenow-skills/",
-      "description": "Solvvision ServiceNow skills — HRSD service creation, SDK patterns, and the catalog delivery pipeline (spec → build → verify) with the catalog-verifier agent",
-      "version": "1.1.0",
+      "description": "Solvvision ServiceNow skills — HRSD service creation, SDK patterns, and platform runbooks",
+      "version": "1.0.0",
       "author": {
         "name": "Solvvision"
       }
@@ -18,6 +18,15 @@
       "source": "./plugins/atf-skills/",
       "description": "SolvVision ATF — atf-unified skill + atf-tester subagent + /atf-verify command + post-deploy hook: self-healing server-side and UI testing with audit reporting for any ServiceNow project",
       "version": "1.1.0",
+      "author": {
+        "name": "Solvvision"
+      }
+    },
+    {
+      "name": "catalog-skills",
+      "source": "./plugins/catalog-skills/",
+      "description": "Solvvision ServiceNow Service Catalog delivery pipeline — spec authoring, item building, fulfillment flows, and the catalog-verifier agent (spec → build → verify)",
+      "version": "1.0.0",
       "author": {
         "name": "Solvvision"
       }

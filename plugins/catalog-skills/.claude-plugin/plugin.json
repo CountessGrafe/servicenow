@@ -1,0 +1,10 @@
+{
+  "name": "catalog-skills",
+  "description": "Solvvision ServiceNow Service Catalog delivery pipeline — spec authoring, item building, fulfillment flows, and the catalog-verifier agent (spec → build → verify)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Solvvision",
+    "url": "https://solvvision.de"
+  },
+  "keywords": ["servicenow", "service-catalog", "catalog-item", "flow-designer", "fluent", "now-sdk"]
+}

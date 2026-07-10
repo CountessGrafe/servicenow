@@ -1,10 +1,10 @@
 {
   "name": "servicenow-skills",
-  "description": "Solvvision ServiceNow skills for Claude Code — HRSD service creation, SDK patterns, and the catalog delivery pipeline (spec authoring, item building, fulfillment flows, catalog-verifier agent)",
-  "version": "1.1.0",
+  "description": "Solvvision ServiceNow skills for Claude Code — HRSD service creation, SDK patterns, and platform runbooks",
+  "version": "1.0.0",
   "author": {
     "name": "Solvvision",
     "url": "https://solvvision.de"
   },
-  "keywords": ["servicenow", "hrsd", "fluent", "now-sdk", "hr-service", "service-catalog", "catalog-item", "flow-designer"]
+  "keywords": ["servicenow", "hrsd", "fluent", "now-sdk", "hr-service"]
 }
