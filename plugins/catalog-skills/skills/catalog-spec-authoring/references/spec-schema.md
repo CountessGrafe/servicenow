@@ -58,17 +58,26 @@ choice_lists:
       - { value: <verbatim>, label: { en, de }, order: 10, active: true,
           price_surcharge: 0 } # lands in question_choice.misc / rec_misc — see traps
 
-behaviors:                     # structured from free-text Notes — each with provenance
+behaviors:                     # structured from free-text Notes — Given/When/Then, not prose
   - source_ref: "Pattern!Notes row 42"
     kind: ui_policy            # ui_policy | client_script | script_include | data
-    trigger: "<condition in source words>"
-    effect: "<effect in source words>"
+    scenario: "<short name>"
+    given: "<precondition — item/variable state, in source words where possible>"
+    when: "<the trigger — a field change, a submit, a load>"
+    then: "<the expected, observable outcome>"
     implementation: TBD        # decided at build; OOB-first rule applies
+    # each entry is close to a ready-made ATF test case — keep it that concrete.
 
 flow:                          # summary — full flow spec in catalog-fulfillment-flows terms
   id: FL-000
   name: { en, de }
   approval: { pattern: AP-003, notes: <verbatim> }
+  fulfillment_behaviors:        # same Given/When/Then shape, for flow-level conditional logic
+    - source_ref: "Flows!Notes row 12"
+      scenario: "Approver fallback"
+      given: "the CI has no managed_by_group set"
+      when: "the approval step runs"
+      then: "route to the Service Desk fallback group (via property lookup, never hardcoded)"
   tasks:
     - name: { de: <verbatim>, en: <reference> }    # fulfiller language per locked decision
       description: { de: <verbatim>, en: <reference> }

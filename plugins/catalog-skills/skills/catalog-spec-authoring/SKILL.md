@@ -31,7 +31,8 @@ Before extracting anything:
    routinely carry the *implementation brief* — UI-policy logic, conditional visibility, CMDB
    side-effects, dynamic pricing — that never appears in structured columns. The extractor must
    carry them into the spec verbatim; the spec author must read them and convert each behavioral
-   statement into a structured `behaviors:` entry (with provenance).
+   statement into a structured `behaviors:` entry (with provenance), phrased as **Given/When/Then**
+   (Gherkin) rather than loose prose — see §Behaviors below.
 4. **Record the language architecture** as a locked decision: which language is primary for which
    artifact, and which is a translation layer. (Example from a German engagement: fulfiller-facing
    `sc_task` text German-primary; item names/descriptions/variable labels English-primary with
@@ -57,6 +58,29 @@ Before extracting anything:
    spec carries a `deviations:` entry: *what the source says · what we build instead · decided by ·
    why*. A deferred/unbuildable requirement is a deviation, not an omission.
 
+## Behaviors: structured data vs. structured behavior
+
+The spec has two different kinds of content, and they need two different formats:
+
+- **Static content** (item name, description, variable labels, choice lists) is a **value** —
+  it's either verbatim-correct or it isn't. Structured key/value fields are right for this: they
+  make a value diffable against the source.
+- **Conditional/procedural content** (UI-policy triggers, flow branching, approval routing,
+  dynamic pricing, validation rules) is a **claim about behavior** — "if the world looks like
+  this, the system should do that." A key/value field can't express that; prose can, but prose
+  invites vague hand-waving ("handle edge cases appropriately"). **Gherkin (Given/When/Then)**
+  is the right structure here: it forces every behavioral requirement into an enumerated,
+  falsifiable scenario.
+
+This is also what makes `behaviors:` valuable downstream, not just at spec time: a Given/When/Then
+entry is already most of an ATF test case. The global ATF-coverage rule ("every artifact gets a
+corresponding test") is far cheaper to satisfy when the test scenarios were written down as part
+of the spec instead of reverse-engineered from a built item later.
+
+Use it for anything conditional at the **item** level (`behaviors:`) or the **flow** level
+(`flow.fulfillment_behaviors:` — approval routing, fallback logic, task branching). Don't use it
+for static fields — a Gherkin scenario for "the item name is X" is a mismatch of format to content.
+
 ## Extraction procedure
 
 1. **Write a deterministic extractor script** (Python + openpyxl for Excel; adapt per source).
@@ -66,8 +90,8 @@ Before extracting anything:
    emitted as `TO_RESOLVE` — resolution against the live instance is a separate later phase
    (`catalog-item-builder`), so specs stay instance-portable.
 3. **The LLM's job is judgment, not transcription:** convert free-text Notes into structured
-   `behaviors:` entries, classify ambiguities as TBDs, propose (and log) missing translations,
-   and fill the corrections/deviations sections.
+   `behaviors:` entries phrased as Given/When/Then, classify ambiguities as TBDs, propose (and
+   log) missing translations, and fill the corrections/deviations sections.
 4. Statuses: `draft` → `spec_ready` (all checklist items pass, TBDs enumerated) → build phases
    rename/flag the file per engagement convention (e.g. `_built-` prefix) so remaining scope is
    always `ls`-able.
@@ -87,7 +111,8 @@ spec drift becomes deployed wrong behavior.
 - [ ] Approval pattern matches the per-item source cell, or a `deviations:` entry explains why not.
 - [ ] Placement (catalog/category/taxonomy) present per item — read from the source for THIS item,
       never copied from a sibling — or listed as a deviation if deferred.
-- [ ] All free-text/Notes columns were read; behavioral content became `behaviors:` entries.
+- [ ] All free-text/Notes columns were read; behavioral content became `behaviors:` entries
+      phrased as Given/When/Then, not loose prose.
 - [ ] No blank source cell was silently filled.
 - [ ] `corrections:` and `deviations:` sections both present (even if explicitly "none").
 - [ ] All unknowns are `TBD`/`TO_RESOLVE` markers, enumerated for the human gate.
